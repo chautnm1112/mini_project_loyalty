@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  loyalty-core:
+    container_name: loyalty-core
+    image: francescoxx/loyalty-core:1.0.0
+    build:
+      context: ./loyalty_core
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: ${APP_LOYALTY_CORE_ENV}
+    ports:
+      - "${HOST_LOYALTY_CORE}:${HOST_LOYALTY_CORE}"
+    depends_on:
+      - db-loyalty-core
+
+  loyalty-accounting:
+    container_name: loyalty-accounting
+    image: francescoxx/loyalty-accounting:1.0.0
+    build:
+      context: ./loyalty_accounting
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: ${APP_LOYALTY_ACCOUNTING_ENV}
+    ports:
+      - "${HOST_LOYALTY_ACCOUNTING}:${HOST_LOYALTY_ACCOUNTING}"
+    depends_on:
+      - db-loyalty-accounting
+
+  db-loyalty-core:
+    container_name: db-loyalty-core
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_DB: ${DB_DATABASE_LOYALTY_CORE}
+    ports:
+      - "${DB_HOST_LOYALTY_CORE}:5432"
+    volumes:
+      - pgdata-core:/var/lib/postgresql/data
+
+  db-loyalty-accounting:
+    container_name: db-loyalty-accounting
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_DB: ${DB_DATABASE_LOYALTY_ACCOUNTING}
+    ports:
+      - "${DB_HOST_LOYALTY_ACCOUNTING}:5432"
+    volumes:
+      - pgdata-accounting:/var/lib/postgresql/data
+
+volumes:
+  pgdata-core: {}
+  pgdata-accounting: {}
